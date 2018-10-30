@@ -2,10 +2,23 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 
 //import todos from './todos';
+//import api from '@/common/api';
+//const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-import api from '@/common/api';
-import ls from '@/common/localStorage'
+import {db} from '@/db';
+import utils from '@/common/utils'
+
+const ls = {
+  get(todos) {
+    return window.localStorage.getItem(todos);
+  },
+  set(todos) {
+    window.localStorage.setItem('todos', todos)
+  },
+  destroy() {
+    console.log('destroy func')
+  }
+}
 
 Vue.use(Vuex)
 
@@ -31,9 +44,27 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    // todos
     getTodos(state) {
-      state.todos = JSON.parse(window.localStorage.getItem('todos')); 
+      const ls_items = window.localStorage.getItem('todos');
+      
+      if(ls_items === null) {
+        console.log('here');
+        window.localStorage.setItem('todos', JSON.stringify(db));
+      }
+
+      state.todos = JSON.parse(window.localStorage.getItem('todos'));
+      
+      
+      //window.localStorage.setItem('todos', JSON.stringify(todos));
     },
+    createTodo(state, todo) {
+      todo['color'] = state.categories[todo.category];
+      todo['id'] = state.todos[state.todos.length-1]['id'] + 1; 
+      state.todos.push(todo);
+    },
+
+    // modal
     setModal(state, modal) {
       state.modal = modal;
     },
@@ -44,5 +75,6 @@ export default new Vuex.Store({
   getters: {
     todos: state => state.todos,
     modal: state => state.modal,
+    categories: state => Object.keys(state.categories),
   }
 })

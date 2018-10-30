@@ -1,9 +1,16 @@
 <template>
 <div class="section column is-8 is-offset-2">
-  <h1>Hello</h1>
   <button 
     @click="show = !show"
-    class="button">Calendar Show</button><hr>
+    :class="show ? 'button is-link' : 'button'"
+  >Calendar</button>
+  
+  <button 
+    @click="showCreate = !showCreate"
+    :class="showCreate ? 'button is-link' : 'button'"
+  >Create</button>
+  
+  <hr>
 
   <v-calendar 
     @dayclick="dayClicked"
@@ -19,42 +26,9 @@
     </span>
   </v-calendar>
 
-  <div v-if='selectedDay'>
-    <h3>{{ selectedDay.date.toDateString() }}</h3>
-    <ul>
-      <li class="box"
-        v-for='attr in selectedDay.attributes'
-        :key='attr.key'>
+  <create-todo :showCreate="showCreate"></create-todo>
 
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">{{ attr.customData.category }}</div>
-          </div>
-          <div class="level-right">
-
-            <button
-              @click="setModal({type: 1, id: 1, isActive: true})" 
-              class="button">Update
-            </button>
-
-            <button class="button">Remove</button>
-
-          </div>
-        </div>
-
-        <div class="level">
-          <div class="level-left">
-            <div class="level-item">{{ attr.customData.description }}</div>
-          </div>
-          <div class="level-right">
-            <div class="level-item">d</div>
-          </div>
-        </div>
-        
-      </li>
-    </ul>
-    <button class="button">Add</button>
-  </div>
+  <selected-day-component :selectedDay="selectedDay"></selected-day-component>
 
   
 
@@ -66,12 +40,19 @@
 
 <script>
 import {mapActions, mapGetters, mapMutations} from 'vuex'
+import SelectedDayVue from './components/SelectedDay.vue';
+import CreateTodoVue from './components/CreateTodo.vue';
 
 export default {
+  components: {
+    selectedDayComponent: SelectedDayVue,
+    createTodo: CreateTodoVue,
+  },
   data() {
     return {
       modalActive : false,
-      show: true,
+      showCreate: true,
+      show: false,
       selectedDay: null,
     }
   },
@@ -98,7 +79,9 @@ export default {
     this.getTodos();
   },
   watch: {
-    
+    '$store.state.todos'(val) {
+      window.localStorage.setItem('todos', JSON.stringify(val));
+    }
   }
 }
 </script>
